@@ -166,7 +166,7 @@ export class SettingsTreeSettingElement extends SettingsTreeElement {
 	}
 
 	private initLabels(): void {
-		const displayKeyFormat = settingKeyToDisplayFormat(this.setting.key, this.parent!.id);
+		const displayKeyFormat = settingKeyToDisplayFormat(this.setting.key, this.parent!.id, this.setting);
 		this._displayLabel = displayKeyFormat.label;
 		this._displayCategory = displayKeyFormat.category;
 	}
@@ -503,8 +503,16 @@ function sanitizeId(id: string): string {
 	return id.replace(/[\.\/]/, '_');
 }
 
-export function settingKeyToDisplayFormat(key: string, groupId = ''): { category: string, label: string; } {
-	const lastDotIdx = key.lastIndexOf('.');
+export function settingKeyToDisplayFormat(key: string, groupId = '', setting: ISetting | undefined = undefined): { category: string, label: string; } {
+	let lastDotIdx = -1;
+
+	try {
+		lastDotIdx = key.lastIndexOf('.');
+	} catch (e) {
+		console.error('Undefined key detected. Setting description: ' + setting?.description);
+		throw e;
+	}
+
 	let category = '';
 	if (lastDotIdx >= 0) {
 		category = key.substring(0, lastDotIdx);
